@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>AI Stock Analyzer</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+
+background:#0f172a;
+color:white;
+font-family:Arial;
+text-align:center;
+
+}
+
+.card{
+
+background:#1e293b;
+padding:20px;
+margin:20px auto;
+width:450px;
+border-radius:10px;
+
+}
+
+input{
+
+padding:10px;
+
+}
+
+button{
+
+padding:10px;
+background:#22c55e;
+border:none;
+color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>AI Stock Analyzer</h1>
+
+<input id="symbol" placeholder="Enter stock e.g RELIANCE">
+
+<button onclick="search()">Analyze</button>
+
+<div class="card" id="result"></div>
+
+<canvas id="chart"></canvas>
+
+<script>
+
+let chart
+
+async function search(){
+
+let symbol=document.getElementById("symbol").value
+
+const res=await fetch(`/api/stock?symbol=${symbol}`)
+
+const data=await res.json()
+
+if(data.error){
+
+document.getElementById("result").innerHTML="Stock not found"
+return
+
+}
+
+document.getElementById("result").innerHTML=`
+
+<h2>${data.symbol}</h2>
+
+<p>Price ?${data.price}</p>
+
+<p>RSI ${data.rsi.toFixed(2)}</p>
+
+<p>MACD ${data.macd.toFixed(2)}</p>
+
+<h3>AI Signal ${data.ai.signal}</h3>
+
+<p>Confidence ${data.ai.confidence}%</p>
+
+<p>Intraday ${data.ai.intraday}</p>
+
+<p>Target ?${data.ai.target}</p>
+
+<p>Stop Loss ?${data.ai.stoploss}</p>
+
+`
+
+drawChart(data.chart)
+
+}
+
+function drawChart(prices){
+
+const ctx=document.getElementById("chart")
+
+if(chart) chart.destroy()
+
+chart=new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:prices.map((_,i)=>i),
+
+datasets:[{
+
+label:"Price",
+
+data:prices
+
+}]
+
+}
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
